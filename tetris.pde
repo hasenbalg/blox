@@ -6,7 +6,7 @@ color backgroundColor;
 
 void setup() {
   size(300, 600);
-  spriteSheet = loadImage("blox.png");
+  spriteSheet = loadImage("spritesheet.png");
   board = new Board(spriteSheet);
   board.stopGame();
   overlay = new Overlay(spriteSheet, board);
