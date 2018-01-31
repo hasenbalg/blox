@@ -60,7 +60,7 @@ class Shape {
     for (int row = 0; row < coords.length; row++) {
       for (int col = 0; col < coords[row].length; col++) {
         if (coords[row][col] != 0) {
-          image(block, (col + x)* board.getBlockSize(), (row + y) * board.getBlockSize());
+          image(block, (col + x)* board.getBlockSize(), (row + y) * board.getBlockSize(),board.getBlockSize(),board.getBlockSize() );
         }
       }
     }
@@ -139,7 +139,7 @@ class Shape {
       
       for(int row = 0; row < rotatedMatrix.length; row++){
         for(int col = 0; col < rotatedMatrix[row].length; col++){
-          if(board.getMatrix()[y + row][x + col] != 0){
+          if(board.getBoardWidth() > x + col && board.getMatrix()[y + row][x + col] != 0){
             return;
           }
         }

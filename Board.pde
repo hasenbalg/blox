@@ -1,8 +1,8 @@
 class Board {
 
   PImage blocks;
-  private final int BLOCKSIZE = 20;
-  private final int BOARDWIDTH = 10, BOARDHEIGHT = 20;
+  private int blocksize = 30 ;
+  private final int BOARDWIDTH = 10, BOARDHEIGHT = 20, BLOCKSPRITESIZE = 30;
   private int[][] board = new int[BOARDHEIGHT][BOARDWIDTH];
 
 
@@ -11,11 +11,13 @@ class Board {
 
   private int score;
   private int POINTSPERLINE = 1;
-  
-  private boolean gameOver = false;
 
-  public Board() {
-    blocks = loadImage("sprite.png");
+  private boolean gameOver = false;
+  private Overlay overlay;
+
+  public Board(PImage sprite) {
+    blocks = sprite;
+    blocksize = width/BOARDWIDTH;
     intiShapes();
 
     setNextShape();
@@ -27,21 +29,21 @@ class Board {
   }
 
   public void draw() {
-    if(gameOver){
-      return;
+    if (!gameOver) {
+      update();
+      currentShape.render();
     }
-    update();
-    currentShape.render();
-    drawGrid();
+
+    //drawGrid();
     drawArrivedShapes();
   }
 
   private void drawGrid() {
     for (int i = 0; i <= BOARDHEIGHT; i++) {
-      line(0, i * BLOCKSIZE, BOARDWIDTH * BLOCKSIZE, i * BLOCKSIZE);
+      line(0, i * blocksize, BOARDWIDTH * blocksize, i * blocksize);
     }
     for (int j = 0; j <= BOARDWIDTH; j++) {
-      line(j * BLOCKSIZE, 0, j * BLOCKSIZE, BOARDHEIGHT * BLOCKSIZE);
+      line(j * blocksize, 0, j * blocksize, BOARDHEIGHT * blocksize);
     }
   }
 
@@ -50,45 +52,45 @@ class Board {
       for (int col = 0; col < board[row].length; col++) {
         if (board[row][col] != 0) {
           int colorIndex = board[row][col] -1;
-          image(blocks.get(colorIndex * BLOCKSIZE, 0, BLOCKSIZE, BLOCKSIZE), col * BLOCKSIZE, row * BLOCKSIZE);
+          image(blocks.get(colorIndex * blocksize, 0, blocksize, blocksize), col * blocksize, row * blocksize);
         }
       }
     }
   }
 
   private void intiShapes() {
-    possibleShapes[0] = new Shape(blocks.get(0, 0, BLOCKSIZE, BLOCKSIZE), new int [][] {
+    possibleShapes[0] = new Shape(blocks.get(0, 0, BLOCKSPRITESIZE, BLOCKSPRITESIZE), new int [][] {
       {1, 1, 1, 1} //I-Shape
       }, this, 1);
 
-    possibleShapes[1] = new Shape(blocks.get(BLOCKSIZE, 0, BLOCKSIZE, BLOCKSIZE), new int [][] {
+    possibleShapes[1] = new Shape(blocks.get(BLOCKSPRITESIZE, 0, BLOCKSPRITESIZE, BLOCKSPRITESIZE), new int [][] {
       {1, 1, 0}, 
       {0, 1, 0}, 
       {0, 1, 1}//Z-Shape
       }, this, 2);
 
-    possibleShapes[2] = new Shape(blocks.get(2 * BLOCKSIZE, 0, BLOCKSIZE, BLOCKSIZE), new int [][] {
+    possibleShapes[2] = new Shape(blocks.get(2 * BLOCKSPRITESIZE, 0, BLOCKSPRITESIZE, BLOCKSPRITESIZE), new int [][] {
       {0, 1, 1}, 
       {0, 1, 0}, 
       {1, 1, 0}//S-Shape
       }, this, 3);
 
-    possibleShapes[3] = new Shape(blocks.get(3 * BLOCKSIZE, 0, BLOCKSIZE, BLOCKSIZE), new int [][] {
+    possibleShapes[3] = new Shape(blocks.get(3 * BLOCKSPRITESIZE, 0, BLOCKSPRITESIZE, BLOCKSPRITESIZE), new int [][] {
       {1, 1, 1}, 
       {0, 0, 1}//J-Shape
       }, this, 4);
 
-    possibleShapes[4] = new Shape(blocks.get(4 * BLOCKSIZE, 0, BLOCKSIZE, BLOCKSIZE), new int [][] {
+    possibleShapes[4] = new Shape(blocks.get(4 * BLOCKSPRITESIZE, 0, BLOCKSPRITESIZE, BLOCKSPRITESIZE), new int [][] {
       {1, 1, 1}, 
       {1, 0, 0}//L-Shape
       }, this, 5);
 
-    possibleShapes[5] = new Shape(blocks.get(5 * BLOCKSIZE, 0, BLOCKSIZE, BLOCKSIZE), new int [][] {
+    possibleShapes[5] = new Shape(blocks.get(5 * BLOCKSPRITESIZE, 0, BLOCKSPRITESIZE, BLOCKSPRITESIZE), new int [][] {
       {1, 1, 1}, 
       {0, 1, 0}//T-Shape
       }, this, 6);
 
-    possibleShapes[6] = new Shape(blocks.get(6 * BLOCKSIZE, 0, BLOCKSIZE, BLOCKSIZE), new int [][] {
+    possibleShapes[6] = new Shape(blocks.get(6 * BLOCKSPRITESIZE, 0, BLOCKSPRITESIZE, BLOCKSPRITESIZE), new int [][] {
       {1, 1}, 
       {1, 1}//O-Shape
       }, this, 7);
@@ -100,9 +102,9 @@ class Board {
   }
 
   private void checkLines() {
-    
+
     ArrayList<int[]> newBoard = new ArrayList();
-    
+
     for (int row = 0; row < board.length; row++) {
       int blockCounter = 0;
       for (int col = 0; col < board[row].length; col++) {
@@ -114,27 +116,25 @@ class Board {
         newBoard.add(board[row]);
       }
     }
-    
+
     int deletedLines = board.length -newBoard.size();
     score += POINTSPERLINE * deletedLines;
-    
+
     for (int i = 0; i < deletedLines; i++) {
       newBoard.add(0, new int[BOARDWIDTH]);
     }
 
 
-    
-    
+
+
     //write changes to board    
-    for(int i = 0; i < board.length; i++){
+    for (int i = 0; i < board.length; i++) {
       board[i] = newBoard.get(i);
     }
-    
-    println(score);
   }
 
   public int getBlockSize() {
-    return BLOCKSIZE;
+    return blocksize;
   }
 
   public int getBoardWidth() {
@@ -151,6 +151,18 @@ class Board {
 
   public void setMatrix(int[][] board) {
     this.board = board;
+  }
+  
+   public void setOverlay(Overlay overlay) {
+    this.overlay = overlay;
+  }
+  
+  public int getScore() {
+    return score;
+  }
+  
+  public Shape getCurrentShape() {
+    return currentShape;
   }
 
   public void keyPressed(int key) {
@@ -174,13 +186,31 @@ class Board {
       }
     }
   }
-  
-  public void endGame(boolean won){
-    if(won){
-      text("win",width/2, height/2);
-    }else{
-      text("loose",width/2, height/2);
+
+  public void endGame(boolean won) {
+    if (won) {
+      overlay.setText("Winner");
+    } else {
+      overlay.setText("Looser");
     }
+    overlay.setVisible(true);
+    gameOver = true;
+  }
+
+  public void startGame() {
+    overlay.setVisible(false);
+    board = new int[BOARDHEIGHT][BOARDWIDTH];
+    score = 0;
+    gameOver = false;
+  }
+
+  public void pauseGame() {
+  }
+
+  public void continueGame() {
+  }
+
+  public void stopGame() {
     gameOver = true;
   }
 }
